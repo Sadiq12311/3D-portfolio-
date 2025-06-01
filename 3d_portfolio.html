@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mohammad Sadiq - 3D Resume</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            overflow-x: hidden;
+            perspective: 1000px;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+        }
+
+        .resume-container {
+            max-width: 900px;
+            margin: 50px auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            transform: rotateY(0deg) rotateX(5deg);
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.320, 1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .resume-container:hover {
+            transform: rotateY(3deg) rotateX(2deg) translateY(-10px);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .profile-section {
+            position: relative;
+            z-index: 2;
+        }
+
+        .name {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+            to { text-shadow: 2px 2px 20px rgba(255, 255, 255, 0.8); }
+        }
+
+        .title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 0;
+            min-height: 600px;
+        }
+
+        .left-column {
+            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 40px 30px;
+            position: relative;
+        }
+
+        .left-column::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+        }
+
+        .right-column {
+            background: white;
+            padding: 40px 30px;
+        }
+
+        .section {
+            margin-bottom: 35px;
+            transform: translateZ(0);
+            transition: all 0.5s ease;
+        }
+
+        .section:hover {
+            transform: translateZ(10px);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #667eea;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: #764ba2;
+            transition: width 0.5s ease;
+        }
+
+        .section:hover .section-title::after {
+            width: 100%;
+        }
+
+        .career-objective {
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+            font-style: italic;
+            line-height: 1.6;
+            transform: perspective(500px) rotateX(0deg);
+            transition: all 0.4s ease;
+        }
+
+        .career-objective:hover {
+            transform: perspective(500px) rotateX(5deg);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .skills-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .skill-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skill-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .skill-item:hover::before {
+            left: 100%;
+        }
+
+        .skill-item:hover {
+            transform: translateX(10px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .skill-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .skill-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .skill-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            position: relative;
+            animation: fillSkill 2s ease-in-out;
+        }
+
+        .skill-progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 10px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 0 4px 4px 0;
+        }
+
+        @keyframes fillSkill {
+            from { width: 0%; }
+        }
+
+        .skill-percentage {
+            font-size: 0.8rem;
+            color: #667eea;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .experience-item {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .experience-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+        }
+
+        .experience-item:hover {
+            transform: translateY(-5px) rotateY(2deg);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.15);
+        }
+
+        .job-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .company-duration {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .project-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #495057;
+            margin: 15px 0 10px 0;
+        }
+
+        .project-details {
+            line-height: 1.6;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .technologies {
+            background: linear-gradient(135deg, #667eea10, #764ba210);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #495057;
+            border-left: 3px solid #667eea;
+        }
+
+        .education-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .education-item:hover {
+            transform: scale(1.02) translateZ(10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .degree {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .institution {
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .score {
+            float: right;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .float-shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .float-shape:nth-child(1) { width: 60px; height: 60px; top: 20%; left: 10%; animation-delay: 0s; }
+        .float-shape:nth-child(2) { width: 80px; height: 80px; top: 60%; left: 85%; animation-delay: 3s; }
+        .float-shape:nth-child(3) { width: 40px; height: 40px; top: 80%; left: 15%; animation-delay: 6s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+            50% { transform: translateY(-30px) rotate(180deg); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .name {
+                font-size: 2rem;
+            }
+            
+            .contact-info {
+                gap: 15px;
+            }
+            
+            .resume-container {
+                margin: 20px;
+                transform: none;
+            }
+            
+            .resume-container:hover {
+                transform: translateY(-5px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div class="floating-elements">
+        <div class="float-shape"></div>
+        <div class="float-shape"></div>
+        <div class="float-shape"></div>
+    </div>
+
+    <div class="resume-container">
+        <div class="header">
+            <div class="profile-section">
+                <h1 class="name">MOHAMMAD SADIQ M</h1>
+                <h2 class="title">Java Spring Boot Microservices Developer</h2>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <span>✉</span>
+                        <span>md.sadiq24.m@gmail.com</span>
+                    </div>
+                    <div class="contact-item">
+                        <span>📱</span>
+                        <span>7760243545</span>
+                    </div>
+                    <div class="contact-item">
+                        <span>📍</span>
+                        <span>Bangalore, India</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="left-column">
+                <div class="section">
+                    <h3 class="section-title">Career Objective</h3>
+                    <div class="career-objective">
+                        To secure a challenging position where I can effectively contribute my skills as a software professional with competent technical expertise.
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">Technical Skills</h3>
+                    <div class="skills-list">
+                        <div class="skill-item">
+                            <div class="skill-name">Java 1.8</div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 90%;"></div>
+                            </div>
+                            <div class="skill-percentage">90%</div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-name">Spring Boot</div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 85%;"></div>
+                            </div>
+                            <div class="skill-percentage">85%</div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-name">Microservices</div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 85%;"></div>
+                            </div>
+                            <div class="skill-percentage">85%</div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-name">Hibernate/JPA</div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 80%;"></div>
+                            </div>
+                            <div class="skill-percentage">80%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">Education</h3>
+                    <div class="education-item">
+                        <div class="degree">B.E (Computer Science & Engineering)</div>
+                        <div class="institution">CMR INSTITUTE OF TECHNOLOGY</div>
+                        <div class="score">2022</div>
+                        <div style="clear: both;"></div>
+                    </div>
+                    <div class="education-item">
+                        <div class="degree">PUC (PCME)</div>
+                        <div class="institution">ALVAS PU COLLEGE</div>
+                        <div class="score">88%</div>
+                        <div style="clear: both;"></div>
+                    </div>
+                    <div class="education-item">
+                        <div class="degree">SSLC</div>
+                        <div class="institution">MM PATIL ENGLISH MEDIUM HIGH SCHOOL</div>
+                        <div class="score">70%</div>
+                        <div style="clear: both;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="section">
+                    <h3 class="section-title">Professional Summary</h3>
+                    <p style="line-height: 1.7; color: #495057;">
+                        A skilled Java Spring Boot Microservices Developer with 1+ years of experience in designing and implementing scalable enterprise applications. Proficient in building RESTful APIs and integrating them with Angular to create seamless user experiences. Strong expertise in Hibernate for ORM, MySQL for database management, and Kafka for reliable messaging.
+                    </p>
+                    <p style="line-height: 1.7; color: #495057; margin-top: 15px;">
+                        Experienced in using Git for version control, Docker for containerization, and Kubernetes for efficient application deployment and scaling. Known for delivering high-quality solutions in agile environments, with a strong focus on SpringBoot, Microservices, and modern development practices.
+                    </p>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">Work Experience</h3>
+                    <div class="experience-item">
+                        <div class="job-title">Software Engineer</div>
+                        <div class="company-duration">RJW (freelancer) • Aug 2023 - October 2024</div>
+                        
+                        <div class="project-title">Healthcare System</div>
+                        <div class="project-details">
+                            <strong>Client:</strong> Cardinal Health, USA<br>
+                            This Project deals with the information about Patients is done by just writing the Patients name, age and gender. Whenever the Patient comes up his information is stored freshly. Bills are generated by recording price for each facility provided to Patient on a separate sheet and at last they all are summed up. The entire project mainly consists of Patient, Doctor, Admin and Service modules.
+                        </div>
+                        
+                        <div style="margin: 15px 0;">
+                            <strong>Role & Responsibilities:</strong>
+                            <ul style="margin: 10px 0; padding-left: 20px; line-height: 1.6; color: #6c757d;">
+                                <li>Ensured seamless interaction between modules by building secure and efficient RESTful APIs.</li>
+                                <li>Integrated Kafka for real-time messaging and asynchronous communication between microservices.</li>
+                                <li>Deployed the application on AWS, leveraging cloud services for scalability and reliability.</li>
+                                <li>Developed interactive front-end components using AngularJS for user-friendly experience.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="technologies">
+                            <strong>Technologies:</strong> Core Java, J2EE, Hibernate, JavaScript, MySQL, Junit, JPA, Linux, Spring Boot, Micro services, Restful, AWS, Kafka, Angular JS, Kubernetes
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Three.js 3D Background Animation
+        let scene, camera, renderer, particles, clock;
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            clock = new THREE.Clock();
+
+            // Create floating particles
+            const geometry = new THREE.BufferGeometry();
+            const vertices = [];
+            const colors = [];
+
+            for (let i = 0; i < 1500; i++) {
+                vertices.push(
+                    (Math.random() - 0.5) * 2000,
+                    (Math.random() - 0.5) * 2000,
+                    (Math.random() - 0.5) * 2000
+                );
+
+                const color = new THREE.Color();
+                color.setHSL(0.6 + Math.random() * 0.2, 0.7, 0.6 + Math.random() * 0.4);
+                colors.push(color.r, color.g, color.b);
+            }
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 2,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            camera.position.z = 400;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const elapsedTime = clock.getElapsedTime();
+
+            // Animate particles
+            particles.rotation.x = elapsedTime * 0.05;
+            particles.rotation.y = elapsedTime * 0.1;
+
+            // Add wave motion
+            const positions = particles.geometry.attributes.position.array;
+            for (let i = 0; i < positions.length; i += 3) {
+                positions[i + 1] += Math.sin(elapsedTime * 2 + positions[i] * 0.01) * 0.5;
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.addEventListener('resize', onWindowResize);
+
+        // Initialize Three.js
+        init();
+        animate();
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0) translateZ(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all sections
+        document.querySelectorAll('.section, .experience-item, .education-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            observer.observe(el);
+        });
+
+        // Mouse parallax effect
+        document.addEventListener('mousemove', (e) => {
+            const mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            const mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+
+            const resume = document.querySelector('.resume-container');
+            const rotationY = mouseX * 5;
+            const rotationX = mouseY * 5;
+
+            resume.style.transform = `rotateY(${rotationY}deg) rotateX(${rotationX}deg) translateY(-10px)`;
+        });
+
+        // Reset transform when mouse leaves
+        document.addEventListener('mouseleave', () => {
+            const resume = document.querySelector('.resume-container');
+            resume.style.transform = 'rotateY(0deg) rotateX(5deg) translateY(0px)';
+        });
+    </script>
+</body>
+</html>
